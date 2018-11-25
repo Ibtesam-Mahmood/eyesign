@@ -50,7 +50,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             child: Container(
               child: Padding(
                 padding: const EdgeInsets.all(0.0),
-                child: _cameraPreviewWidget(),
+                child: GestureDetector(
+                  child:_cameraPreviewWidget(),
+                  onDoubleTap: () {
+                    flipCamera();
+                  } ,
+                )
               ),
             ),
           ),
@@ -60,7 +65,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-              _cameraTogglesRowWidget(),
+              
               ],
             ),
           ),
@@ -89,8 +94,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   Widget _cameraPreviewWidget() {
     if (controller == null || !controller.value.isInitialized) 
     { 
-      initState();
-    } else 
+      
+    } 
+    else 
     {
       final size = MediaQuery.of(context).size;
       final deviceRatio = (size.width / (size.height -76));
@@ -103,10 +109,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       );
     }
   }
-
-  /// Display the thumbnail of the captured image or video.
-  
-
   /// Display the control bar with buttons to take pictures and record videos.
   Widget _captureControlRowWidget() {
     return Row(
@@ -120,13 +122,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   /// Display a row of toggle to select the camera (or a message if no camera is available).
-  Widget _cameraTogglesRowWidget() {
+  /*Widget _cameraTogglesRowWidget() {
     final List<Widget> toggles = <Widget>[];
   {
-    //if (cameras.isEmpty)
-    // {
-      //return const Text('No camera found');
-    //} else {
+   
       for (CameraDescription cameraDescription in cameras) {
         toggles.add(
           SizedBox(
@@ -145,7 +144,55 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
 
     return Row(children: toggles);
+  }*/
+  bool _isRecording() {
+    return controller != null;// && controller.value.isRecordingVideo
   }
+  int _count = 0;
+  Widget _doubleTapWidget() {
+    CameraDescription cameraDescription;
+
+
+    return GestureDetector(
+      child: _cameraPreviewWidget(),
+      onDoubleTap: () {
+        _count++;
+        _count = _count <= 1 ? _count : 0;
+
+        cameraDescription = cameras.elementAt(_count);
+        onNewCameraSelected(cameraDescription);
+      },
+    );
+  }
+  
+Widget switchCamera(BuildContext context){
+  return new GestureDetector(
+    child: ButtonBar(),
+    onDoubleTap: () => flipCamera(),
+  );
+}
+
+Future<Null> _restartCamera(CameraDescription description) async {
+    final CameraController tempController = controller;
+    controller = null;
+    await tempController?.dispose();
+    controller = new CameraController(description, ResolutionPreset.high);
+await controller.initialize();
+}
+
+Future<Null> flipCamera() async {
+  if (controller != null) {
+    var newDescription = cameras.firstWhere((desc) {
+      return desc.lensDirection != controller.description.lensDirection;
+    });
+
+    await _restartCamera(newDescription);
+  }
+}
+
+
+
+
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
