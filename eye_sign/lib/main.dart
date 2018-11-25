@@ -8,10 +8,12 @@ import 'package:path_provider/path_provider.dart';
 
 class CameraExampleHome extends StatefulWidget {
   @override
-  _CameraExampleHomeState createState() {
-    return _CameraExampleHomeState();
-  }
+  _CameraExampleHomeState createState() => new _CameraExampleHomeState();
+   
 }
+
+
+
 
 /// Returns a suitable camera icon for [direction]. SELECTOR FOR CAMERA
 IconData getCameraLensIcon(CameraLensDirection direction) {
@@ -31,12 +33,9 @@ IconData getCameraLensIcon(CameraLensDirection direction) {
 void logError(String code, String message) =>
     print('Error: $code\nError Message: $message');
 
-class _CameraExampleHomeState extends State<CameraExampleHome> {
+class _CameraExampleHomeState extends State<CameraExampleHome> 
+{
   CameraController controller;
-  String imagePath;
-  String videoPath;
-  
-  VoidCallback videoPlayerListener;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -70,18 +69,29 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    controller = new CameraController(cameras[0], ResolutionPreset.high);
+    controller.initialize().then((_)
+    {
+      if (!mounted)
+      {
+        return;
+      }
+    setState(() {
+          
+        });
+    });
+  }
+
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
-    if (controller == null || !controller.value.isInitialized) {
-      return const Text(
-        'Select Front or Back Camera',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24.0,
-          fontWeight: FontWeight.w900,
-        ),
-      );
-    } else {
+    if (controller == null || !controller.value.isInitialized) 
+    { 
+      initState();
+    } else 
+    {
       final size = MediaQuery.of(context).size;
       final deviceRatio = (size.width / (size.height -76));
       return Transform.scale(
@@ -112,10 +122,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
   /// Display a row of toggle to select the camera (or a message if no camera is available).
   Widget _cameraTogglesRowWidget() {
     final List<Widget> toggles = <Widget>[];
-
-    if (cameras.isEmpty) {
-      return const Text('No camera found');
-    } else {
+  {
+    //if (cameras.isEmpty)
+    // {
+      //return const Text('No camera found');
+    //} else {
       for (CameraDescription cameraDescription in cameras) {
         toggles.add(
           SizedBox(
@@ -181,11 +192,6 @@ class CameraApp extends StatelessWidget {
 List<CameraDescription> cameras;
 
 Future<Null> main() async {
-  // Fetch the available cameras before initializing the app.
-  try {
-    cameras = await availableCameras();
-  } on CameraException catch (e) {
-    logError(e.code, e.description);
-  }
-  runApp(CameraApp());
+  cameras = await availableCameras();
+  runApp(new CameraApp());
 }
