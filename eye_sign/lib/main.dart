@@ -44,10 +44,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('EyeSign'),
       
-      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -56,24 +53,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
                 padding: const EdgeInsets.all(0.0),
                 child: _cameraPreviewWidget(),
               ),
-              decoration: BoxDecoration(
-                color: Colors.white70,
-                border: Border.all(
-                  color: controller != null && controller.value.isRecordingVideo
-                      ? Colors.redAccent
-                      : Colors.grey,
-                  width: 0.0,
-                ),
-              ),
             ),
           ),
           _captureControlRowWidget(),
           Padding(
-            padding: const EdgeInsets.all(5.0),
+            padding: const EdgeInsets.all(76.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                _cameraTogglesRowWidget(),
+              _cameraTogglesRowWidget(),
               ],
             ),
           ),
@@ -94,9 +82,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
         ),
       );
     } else {
-      return AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
-        child: CameraPreview(controller),
+      final size = MediaQuery.of(context).size;
+      final deviceRatio = (size.width / (size.height -76));
+      return Transform.scale(
+        scale: controller.value.aspectRatio / deviceRatio,
+        child: AspectRatio(
+          aspectRatio: controller.value.aspectRatio,
+          child: CameraPreview(controller),
+        ),
       );
     }
   }
@@ -126,7 +119,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
       for (CameraDescription cameraDescription in cameras) {
         toggles.add(
           SizedBox(
-            width: 90.0,
+            width: 164.0,
             child: RadioListTile<CameraDescription>(
               title: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
               groupValue: controller?.description,
@@ -166,80 +159,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     try {
       await controller.initialize();
     } on CameraException catch (e) {
-      _showCameraException(e);
+      
     }
 
     if (mounted) {
       setState(() {});
     }
-  }
-
-
-  void onVideoRecordButtonPressed() {
-    startVideoRecording().then((String filePath) {
-      if (mounted) setState(() {});
-      if (filePath != null) showInSnackBar('Saving video to $filePath');
-    });
-  }
-
- 
-
-  Future<String> startVideoRecording() async {
-    if (!controller.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
-      return null;
-    }
-
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Movies/flutter_test';
-    await Directory(dirPath).create(recursive: true);
-    final String filePath = '$dirPath/${timestamp()}.mp4';
-
-    if (controller.value.isRecordingVideo) {
-      // A recording is already started, do nothing.
-      return null;
-    }
-
-    try {
-      videoPath = filePath;
-      await controller.startVideoRecording(filePath);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return null;
-    }
-    return filePath;
-  }
-
- 
-
-
-  Future<String> takePicture() async {
-    if (!controller.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
-      return null;
-    }
-    final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/Pictures/flutter_test';
-    await Directory(dirPath).create(recursive: true);
-    final String filePath = '$dirPath/${timestamp()}.jpg';
-
-    if (controller.value.isTakingPicture) {
-      // A capture is already pending, do nothing.
-      return null;
-    }
-
-    try {
-      await controller.takePicture(filePath);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return null;
-    }
-    return filePath;
-  }
-
-  void _showCameraException(CameraException e) {
-    logError(e.code, e.description);
-    showInSnackBar('Error: ${e.code}\n${e.description}');
   }
 }
 
@@ -248,6 +173,7 @@ class CameraApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: CameraExampleHome(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
