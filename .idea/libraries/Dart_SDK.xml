@@ -21,7 +21,6 @@
       <root url="file://$USER_HOME$/Downloads/flutter/bin/cache/dart-sdk/lib/web_gl" />
       <root url="file://$USER_HOME$/Downloads/flutter/bin/cache/dart-sdk/lib/web_sql" />
     </CLASSES>
-    <JAVADOC />
     <SOURCES />
   </library>
 </component>
